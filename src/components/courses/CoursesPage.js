@@ -1,50 +1,56 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as courseActions from '../../redux/actions/courseActions';
+import * as authorActions from '../../redux/actions/authorActions';
+import { bindActionCreators } from 'redux';
+import CoursesList from './CoursesList';
 
 const mapStateToProps = state => ({
-  courses: state.courses
+  courses:
+    state.authors.length === 0
+      ? []
+      : state.courses.map(course => {
+          return {
+            ...course,
+            authorName: state.authors.find(a => a.id === course.authorId).name
+          };
+        }),
+  authors: state.authors
 });
 
 const mapDispatchToProps = dispatch => ({
-  createCourse: course => dispatch(courseActions.createCourse(course))
+  actions: {
+    loadCourses: bindActionCreators(courseActions.loadCourses, dispatch),
+    loadAuthors: bindActionCreators(authorActions.loadAuhtors, dispatch)
+  }
 });
 
 class CoursesPage extends Component {
-  state = {
-    course: {
-      title: ''
+  componentDidMount() {
+    if (this.props.courses.length === 0) {
+      this.props.actions.loadCourses();
     }
-  };
-
-  handleChange = event => {
-    const course = { ...this.state.course, title: event.target.value };
-    this.setState({ course });
-  };
-
-  handleSubmit = event => {
-    event.preventDefault();
-    this.props.createCourse(this.state.course);
-  };
+    if (this.props.authors.length === 0) {
+      this.props.actions.loadAuthors();
+    }
+  }
 
   render() {
     return (
-      <form>
+      <>
         <h2>Course</h2>
-        <h3>Add Course</h3>
-        <input
-          type="text"
-          onChange={this.handleChange}
-          value={this.state.course.title}
-        />
-        <input type="submit" value="Save" onClick={this.handleSubmit} />
-        {this.props.courses.map(course => (
-          <div key={course.title}>{course.title}</div>
-        ))}
-      </form>
+        <CoursesList courses={this.props.courses} />
+      </>
     );
   }
 }
+
+CoursesPage.propTypes = {
+  courses: PropTypes.array.isRequired,
+  authors: PropTypes.array.isRequired,
+  actions: PropTypes.object.isRequired
+};
 
 export default connect(
   mapStateToProps,

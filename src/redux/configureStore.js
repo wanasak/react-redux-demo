@@ -1,13 +1,15 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import rootReducer from './reducers';
-import reduxImmutable from 'redux-immutable-state-invariant';
+import reduxImmutableStateInvariant from 'redux-immutable-state-invariant';
+import thunk from 'redux-thunk';
 
 export default function configureStore(initialState) {
-  const composeEnhance = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose; // add support for Redux dev tools
 
   return createStore(
     rootReducer,
     initialState,
-    composeEnhance(applyMiddleware(reduxImmutable()))
+    composeEnhancers(applyMiddleware(thunk, reduxImmutableStateInvariant()))
   );
 }
