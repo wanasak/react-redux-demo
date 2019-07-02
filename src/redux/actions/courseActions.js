@@ -1,9 +1,11 @@
 import {
   LOAD_COURSES_SUCCESS,
   CREATE_COURSE_SUCCESS,
-  UPDATE_COURSE_SUCCESS
+  UPDATE_COURSE_SUCCESS,
+  DELETE_COURSE_OPTIMISTIC
 } from './actionTypes';
 import * as courseApi from '../../api/courseApi';
+import { beginApiCall, apiCallError } from './apiStatusAction';
 
 // export function createCourse(course) {
 //   return {
@@ -33,12 +35,21 @@ export function updateCourseSuccess(course) {
   };
 }
 
+export function deleteCourseOptimistic(course) {
+  return {
+    type: DELETE_COURSE_OPTIMISTIC,
+    course
+  };
+}
+
 export function loadCourses() {
   return function(dispatch) {
+    dispatch(beginApiCall());
     return courseApi
       .getCourses()
       .then(courses => dispatch(loadCoursesSuccess(courses)))
       .catch(error => {
+        dispatch(apiCallError(error));
         throw error;
       });
   };
@@ -46,7 +57,7 @@ export function loadCourses() {
 
 export function saveCourse(course) {
   return function(dispatch, getState) {
-    debugger;
+    dispatch(beginApiCall());
     return courseApi
       .saveCourse(course)
       .then(savedCourse => {
@@ -55,7 +66,15 @@ export function saveCourse(course) {
           : dispatch(createCourseSuccess(savedCourse));
       })
       .catch(error => {
+        dispatch(apiCallError(error));
         throw error;
       });
+  };
+}
+
+export function deleteCourse(course) {
+  return function(dispatch) {
+    dispatch(deleteCourseOptimistic(course));
+    return courseApi.deleteCourse(course.id);
   };
 }
