@@ -6,6 +6,7 @@ import * as authorActions from '../../redux/actions/authorActions';
 import { bindActionCreators } from 'redux';
 import CoursesList from './CoursesList';
 import { Redirect } from 'react-router-dom';
+import Spinner from '../common/Spinner';
 
 const mapStateToProps = state => ({
   courses:
@@ -44,6 +45,7 @@ class CoursesPage extends Component {
       <>
         {this.state.redirectToAddCoursePage && <Redirect to="/course" />}
         <h2>Course</h2>
+        <Spinner />
         <button
           style={{ marginBottom: 20 }}
           onClick={() => this.setState({ redirectToAddCoursePage: true })}
